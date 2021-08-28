@@ -51,6 +51,9 @@ def get_hh_vacancies(page_number):
             min_salary = salaries[0]
             if len(salaries) > 1:
                 max_salary = salaries[1]
+            elif re.search(r'^\S+', salary_info)[0] == 'до':
+                min_salary = None
+                max_salary = salaries[0]
             else:
                 max_salary = None
         except AttributeError:
@@ -99,6 +102,9 @@ def get_sjob_vacancies(page):
             min_salary = salaries[0]
             if len(salaries) > 1:
                 max_salary = salaries[1]
+            elif re.search(r'^\S+', salary_info)[0] == 'до':
+                min_salary = None
+                max_salary = salaries[0]
             else:
                 max_salary = None
 
