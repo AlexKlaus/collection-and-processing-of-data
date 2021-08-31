@@ -31,7 +31,7 @@ def parse_technology_news(items):
         time = item.xpath(".//span[@class='mg-card-source__time']/text()")
 
         items_data['news_title'] = news_title[0].replace('\xa0', ' ')
-        items_data['source_name'] = source_name[0]
+        items_data['source_name'] = source_name[0].replace('Источник: ', '')
         items_data['link'] = link[0]
         items_data['date'] = f'{datetime.date(datetime.today())} {time[0]}'
 
