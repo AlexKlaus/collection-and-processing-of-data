@@ -15,7 +15,7 @@ HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
 RESPONSE = requests.get('https://yandex.ru/news/', headers=HEADER)
 DOM = html.fromstring(RESPONSE.text)
 ITEMS = DOM.xpath(
-    "//a[contains(text(), 'Технологии')]/../../../following-sibling::div[1]//article")
+    "//a[text()='Технологии']/../../../following-sibling::div[1]//article")
 
 
 def parse_technology_news(items):
