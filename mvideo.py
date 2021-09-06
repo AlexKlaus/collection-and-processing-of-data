@@ -1,8 +1,14 @@
 import json
+import pymongo.errors
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from pymongo import MongoClient
+
+CLIENT = MongoClient('127.0.0.1', 27017)
+DB = CLIENT['mvideo']
+mvideo = DB.mvideo
 
 chrome_options = Options()
 chrome_options.add_argument('start-maximized')
@@ -16,21 +22,24 @@ actions = ActionChains(driver)
 actions.move_to_element(new_items_section)
 actions.key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN)
 actions.perform()
-
-items = driver.find_elements_by_xpath(
-    "//h2[contains(text(), 'Новинки')]/../../..//a[@data-product-info and contains(@class, 'title__link')]")
-
-data = []
-actions = ActionChains(driver)
-while True:
-    for i in items:
-        item = i.get_attribute('data-product-info').replace('\n', '').replace('\t\t\t\t\t', '')
-        data.append(json.loads(item))
-    arrow = driver.find_element_by_xpath(
+arrow = driver.find_element_by_xpath(
         "//h2[contains(text(), 'Новинки')]/../../..//a[contains(@class, 'next-btn')]")
+
+while True:
     if 'disabled' in arrow.get_attribute('class'):
         break
-    actions.click(arrow)
-    actions.perform()
+    arrow.click()
 
-print(len(data))
+items = driver.find_elements_by_xpath(
+    "//h2[contains(text(), 'Новинки')]/../../.."
+    "//a[@data-product-info and contains(@class, 'title__link')]")
+
+for i in items:
+    item = json.loads(
+        i.get_attribute('data-product-info').replace('\n', '').replace('\t\t\t\t\t', ''))
+    try:
+        mvideo.insert_one(
+            {'_id': item['productId'],
+             **item})
+    except pymongo.errors.DuplicateKeyError:
+        continue
