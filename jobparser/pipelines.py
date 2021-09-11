@@ -19,8 +19,10 @@ class JobparserPipeline:
     def process_item(self, item, spider):
         if spider.name == 'hhru':
             min_salary, max_salary, currency = self.process_salary_hh(item['salary'])
+            item['site'] = 'https://hh.ru/'
         else:
             min_salary, max_salary, currency = self.process_salary_sjob(item['salary'])
+            item['site'] = 'https://www.superjob.ru/'
         item['salary'] = {'min_salary': min_salary,
                           'max_salary': max_salary,
                           'currency': currency}
@@ -56,7 +58,7 @@ class JobparserPipeline:
         cur = None
         salary = re.sub(r'\<[^>]*\>', '', salary)
         if salary != 'По договорённости':
-            cur = salary.split('\xa0')[-1].replace('/месяц', '')
+            cur = salary.split('\xa0')[-1].replace('/месяц', '').replace('/день', '')
             salary_sum = [float(x.replace('\xa0', ''))
                           for x in
                           re.findall(r'\d+\s+\d+', salary)]

@@ -15,4 +15,4 @@ class JobparserItem(scrapy.Item):
     salary = scrapy.Field()
     currency = scrapy.Field()
     url = scrapy.Field()
-
+    site = scrapy.Field()
