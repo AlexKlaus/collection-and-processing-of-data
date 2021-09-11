@@ -6,7 +6,8 @@ from jobparser.items import JobparserItem
 class SjruSpider(scrapy.Spider):
     name = 'sjru'
     allowed_domains = ['superjob.ru']
-    start_urls = ['https://www.superjob.ru/vacancy/search/?keywords=Python&geo%5Bt%5D%5B0%5D=4']
+    start_urls = ['https://www.superjob.ru/vacancy/search/?keywords=Python&geo%5Bt%5D%5B0%5D=4',
+                  'https://www.superjob.ru/vacancy/search/?keywords=Python&geo%5Br%5D%5B0%5D=2']
 
 
     def parse(self, response: HtmlResponse):
