@@ -5,18 +5,19 @@ from scrapy.http import HtmlResponse
 from urllib.parse import urlencode
 from copy import deepcopy
 from instaparser.items import InstaparserItem
+from passw import login, passw
+
 
 class InstagramSpider(scrapy.Spider):
     name = 'instagram'
     allowed_domains = ['instagram.com']
     start_urls = ['https://www.instagram.com']
-    insta_login = 'Onliskill_udm'
-    insta_pass = '#PWD_INSTAGRAM_BROWSER:10:1629825416:ASpQAMvl1EAdo0NdRZNcM1/pjlU9rRg4n4cjCM00SDGSV5pDN6XbC93ZbYN67HUOHkXZnGGe2gIWPU2qtQY0HAkIjR5U5syu+lv8qtqeI7cyy2ua6WmBV6AngVo1apn3eJ6O3UAFVgb+q5HtHsQ='
     insta_login_link = 'https://www.instagram.com/accounts/login/ajax/'
-    user_parse = 'ai_machine_learning'
+    user_parse = ['ai_machine_learning', 'rollomaticsa']
     posts_hash = '8c2a529969ee035a5063f2fc8602a0fd'
     graphql_url = 'https://www.instagram.com/graphql/query/?'
-
+    insta_login = login
+    insta_pass = passw
 
 
     def parse(self, response: HtmlResponse):
@@ -31,9 +32,11 @@ class InstagramSpider(scrapy.Spider):
     def user_login(self, response: HtmlResponse):
         j_body = response.json()
         if j_body['authenticated']:
-            yield response.follow(f'/{self.user_parse}',
-                                  callback=self.user_data_parse,
-                                  cb_kwargs={'username': self.user_parse})
+            for user in self.user_parse:
+                yield response.follow(f'/{user}',
+                                      callback=self.user_data_parse,
+                                      cb_kwargs={'username': user},
+                                      headers={'User_Agent': 'Instagram 155.0.0.37.107'})
 
 
     def user_data_parse(self, response: HtmlResponse, username):
