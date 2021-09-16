@@ -2,8 +2,6 @@ import scrapy
 import re
 import json
 from scrapy.http import HtmlResponse
-from urllib.parse import urlencode
-from copy import deepcopy
 from instaparser.items import InstaparserItem
 from passw import login, passw
 
@@ -42,8 +40,12 @@ class InstagramSpider(scrapy.Spider):
         user_id = self.fetch_user_id(response.text, username)
         url_followers = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?' \
                         f'count=12&search_surface=follow_list_page'
+        url_followings = f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12'
         yield response.follow(url_followers,
                               callback=self.followers_parse,
+                              cb_kwargs={'username': username})
+        yield response.follow(url_followings,
+                              callback=self.followings_parse,
                               cb_kwargs={'username': username})
 
 
@@ -55,19 +57,34 @@ class InstagramSpider(scrapy.Spider):
                                       callback=self.followers_parse,
                                       cb_kwargs={'username': username})
             for user in j_data['users']:
-                item = InstaparserItem(parsed_user=username,
+                item = InstaparserItem(followers_or_followings='followers',
+                                       parsed_user=username,
                                        name=user.get('full_name'),
                                        id=user.get('pk'),
                                        picture=user.get('profile_pic_url'))
                 yield item
 
+    def followings_parse(self, response: HtmlResponse, username):
+        if response.status == 200:
+            j_data = response.json()
+            if j_data.get('next_max_id'):
+                yield response.follow(response.url + f"&max_id={j_data['next_max_id']}",
+                                      callback=self.followings_parse,
+                                      cb_kwargs={'username': username})
+            for user in j_data['users']:
+                item = InstaparserItem(followers_or_followings='followings',
+                                       parsed_user=username,
+                                       name=user.get('full_name'),
+                                       id=user.get('pk'),
+                                       picture=user.get('profile_pic_url'))
+                yield item
 
-    #Получаем токен для авторизации
+    # Получаем токен для авторизации
     def fetch_csrf_token(self, text):
         matched = re.search('\"csrf_token\":\"\\w+\"', text).group()
         return matched.split(':').pop().replace(r'"', '')
 
-    #Получаем id желаемого пользователя
+    # Получаем id желаемого пользователя
     def fetch_user_id(self, text, username):
         matched = re.search(
             '{\"id\":\"\\d+\",\"username\":\"%s\"}' % username, text

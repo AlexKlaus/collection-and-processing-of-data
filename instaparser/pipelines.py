@@ -17,7 +17,7 @@ class InstaparserPipeline:
 
 
     def process_item(self, item, spider):
-        collection = self.mongo_base[f"{item['parsed_user']}'s followers"]
+        collection = self.mongo_base[item['parsed_user']]
         del item['parsed_user']
         collection.insert_one(item)
 
