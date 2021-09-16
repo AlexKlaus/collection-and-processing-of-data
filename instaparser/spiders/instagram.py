@@ -13,7 +13,7 @@ class InstagramSpider(scrapy.Spider):
     allowed_domains = ['instagram.com']
     start_urls = ['https://www.instagram.com']
     insta_login_link = 'https://www.instagram.com/accounts/login/ajax/'
-    user_parse = ['ai_machine_learning', 'rollomaticsa']
+    user_parse = ['make3dprint_spb', 'rollomaticsa']
     posts_hash = '8c2a529969ee035a5063f2fc8602a0fd'
     graphql_url = 'https://www.instagram.com/graphql/query/?'
     insta_login = login
@@ -40,7 +40,8 @@ class InstagramSpider(scrapy.Spider):
 
     def user_data_parse(self, response: HtmlResponse, username):
         user_id = self.fetch_user_id(response.text, username)
-        url_followers = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&search_surface=follow_list_page'
+        url_followers = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?' \
+                        f'count=12&search_surface=follow_list_page'
         yield response.follow(url_followers,
                               callback=self.followers_parse,
                               cb_kwargs={'username': username})
@@ -49,6 +50,10 @@ class InstagramSpider(scrapy.Spider):
     def followers_parse(self, response: HtmlResponse, username):
         if response.status == 200:
             j_data = response.json()
+            if j_data.get('next_max_id'):
+                yield response.follow(response.url + f"&max_id={j_data['next_max_id']}",
+                                      callback=self.followers_parse,
+                                      cb_kwargs={'username': username})
             for user in j_data['users']:
                 item = InstaparserItem(parsed_user=username,
                                        name=user.get('full_name'),
