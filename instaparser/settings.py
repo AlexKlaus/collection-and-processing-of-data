@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'instaparser.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'
+USER_AGENT = 'Instagram 155.0.0.37.107'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
